@@ -35,6 +35,8 @@ blog.save((error,data)=>{
 };
 
 exports.updateBlog=(req,res)=>{
+  if(req.blog.user!=req.params.userId)
+  return res.status(400).json({error:"Access denied"})
   Blog
     .findOneAndUpdate({_id:req.params.blogId}, req.body)
     .exec(function(err, blog){
@@ -52,6 +54,8 @@ exports.updateBlog=(req,res)=>{
 
 exports.deleteBlog=(req,res)=>{
   let blog=req.blog;
+  if(blog.user!=req.params.userId)
+  return res.status(400).json({error:"Access denied"});
   blog.remove((err,deletedBlog)=>{
     if(err){
       return res.status(400).json({error:errorHandler(err)});
@@ -70,5 +74,37 @@ exports.getUserBlogs=(req,res)=>{
     })
   }
   res.json(blogs);
+})
+}
+
+exports.getAllBlogs=(req,res)=>{
+  Blog.find()
+.sort('-created')
+.exec((err,blogs)=>{
+  if(err){
+    return res.status(400).json({
+      error:errorHandler(error)
+    })
+  }
+  res.json(blogs);
+})
+}
+
+exports.likeBlog=(req,res)=>{
+  let blog=req.blog;
+  blog.like=blog.like+1;
+  Blog.update({_id:req.params.blogId},{$set:{like:blog.like}},(err,blog)=>{
+  if(err){
+    return res.status(400).json({
+      error:errorHandler(err)
+    });
+  }
+})
+Blog.findById(req.params.blogId)
+.exec((err,blog)=>{
+  if(err){
+    console.log(err);
+  }
+  res.json(blog);
 })
 }
