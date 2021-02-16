@@ -59,3 +59,16 @@ exports.deleteBlog=(req,res)=>{
     res.json({message:"Blog deleted successfully"});
   });
 };
+
+exports.getUserBlogs=(req,res)=>{
+  Blog.find({ user: req.params.userId })
+.sort('-created')
+.exec((err,blogs)=>{
+  if(err){
+    return res.status(400).json({
+      error:errorHandler(error)
+    })
+  }
+  res.json(blogs);
+})
+}
