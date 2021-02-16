@@ -15,8 +15,8 @@ exports.signup = (req, res) => {
         user.hashed_password = undefined;
         const token=jwt.sign({_id:user._id},JWT_SECRET);
         res.cookie("t",token,{expire:new Date()+9999})
-        const {_id,name,email}=user;
-        res.json({token,user:{_id,email,name}})
+        const {_id,name,email,about}=user;
+        res.json({token,user:{_id,email,name,about}})
 
     });
 };
@@ -34,8 +34,8 @@ exports.signin=(req,res)=>{
 
     const token=jwt.sign({_id:user._id},JWT_SECRET);
     res.cookie("t",token,{expire:new Date()+9999})
-    const {_id,name,email}=user;
-    return res.json({token,user:{_id,email,name}})
+    const {_id,name,email,about}=user;
+    return res.json({token,user:{_id,email,name,about}})
 
   });
 };
@@ -70,3 +70,16 @@ exports.userById = (req, res, next, id) => {
         next();
     });
 };
+
+exports.getUser=(req,res)=>{
+User.find({ _id: req.params.userId })
+    .exec((err,user)=>{
+    if(err){
+      return res.status(400).json({
+        error:errorHandler(error)
+      })
+    }
+    res.json(user);
+  })
+
+}

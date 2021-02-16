@@ -5,12 +5,14 @@ const {
   signup,
   signin,
   signout,
-  requireSignin
+  requireSignin,
+  getUser
 }=require("../controllers/user");
 const {userSignupValidator}=require("../validator");
 
 router.post("/signup",userSignupValidator,signup);
 router.post("/login",signin);
 router.get("/signout",signout);
+router.get("/user/:userId",getUser);
 
 module.exports=router;
