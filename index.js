@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI,
 
 // Routes
 const userRoutes=require("./routes/user");
-//const blogRoutes=require("./routes/blog");
+const blogRoutes=require("./routes/blog");
 
 //middlewares
 app.use(morgan("dev"));
@@ -31,7 +31,7 @@ app.use(cors());
 
 //routes middleware
 app.use("/api",userRoutes);
-//app.use("/api",blogRoutes);
+app.use("/api",blogRoutes);
 
 const port=process.env.PORT||8000;
 
