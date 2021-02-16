@@ -49,3 +49,13 @@ exports.updateBlog=(req,res)=>{
       res.json(blog);
     })
 };
+
+exports.deleteBlog=(req,res)=>{
+  let blog=req.blog;
+  blog.remove((err,deletedBlog)=>{
+    if(err){
+      return res.status(400).json({error:errorHandler(err)});
+    }
+    res.json({message:"Blog deleted successfully"});
+  });
+};
