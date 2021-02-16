@@ -7,7 +7,7 @@ exports.blogById=(req,res,next,id)=>{
   .exec((err,blog)=>{
     if(err||!blog){
       return res.status(400).json({
-        error:errorHandler(err)
+        error:"Blog does'nt exists."
       });
     }
     req.blog=blog;
@@ -32,4 +32,20 @@ blog.save((error,data)=>{
   }
   res.json(data);
 })
+};
+
+exports.updateBlog=(req,res)=>{
+  Blog
+    .findOneAndUpdate({_id:req.params.blogId}, req.body)
+    .exec(function(err, blog){
+      if(err) return res.status(500).json({err: err.message});
+      //res.json({blog, message: 'Successfully updated'})
+    });
+    Blog.findById(req.params.blogId)
+    .exec((err,blog)=>{
+      if(err){
+        console.log(err);
+      }
+      res.json(blog);
+    })
 };
