@@ -72,14 +72,15 @@ exports.userById = (req, res, next, id) => {
 };
 
 exports.getUser=(req,res)=>{
-User.find({ _id: req.params.userId })
-    .exec((err,user)=>{
-    if(err){
-      return res.status(400).json({
-        error:errorHandler(error)
-      })
+User.findById(req.params.userId)
+.exec((err, user) => {
+    if (err || !user) {
+        return res.status(400).json({
+            error: 'User not found'
+        });
     }
-    res.json(user);
-  })
+  res.json(user)
+
+});
 
 }

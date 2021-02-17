@@ -8,6 +8,7 @@ import themeFile from "./util/theme";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
+import User from "./pages/User";
 
 const theme=createMuiTheme(themeFile);
 
@@ -19,6 +20,7 @@ const Routes=()=>{
       <Route path="/signup" exact component={Signup}/>
       <Route path="/login" exact component={Login}/>
       <Route path="/" exact component={Home}/>
+      <Route path="/users/:userId" exact component={User}/>
     </Switch>
     </Router>
     </MuiThemeProvider>

@@ -11,7 +11,7 @@ import HomeIcon from "@material-ui/icons/Home";
 
 const Navbar=()=>{
   return(
-    <AppBar position="fixed">
+    <AppBar position="fixed" color="secondary">
      <Toolbar className="nav-container">
     {isAuthenticated()?(
       <Fragment>

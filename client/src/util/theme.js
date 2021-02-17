@@ -5,7 +5,7 @@ export default {
       contrastText:"#fff"
     },
     secondary:{
-    main:"#2cd9d0",
+    main:"#006080",
     contrastText:"#fff"
     }
   },
@@ -75,7 +75,7 @@ export default {
         verticalAlign:"middle"
       },
       "& a":{
-        color:"#2cd9d0"
+        color:"#006080"
       }
     },
     "& hr":{

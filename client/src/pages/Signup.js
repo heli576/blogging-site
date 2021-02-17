@@ -1,7 +1,7 @@
 import React,{useState} from "react";
 import Navbar from "../components/Navbar";
 import { makeStyles } from '@material-ui/core/styles';
-import {Link} from "react-router-dom";
+import {Link,Redirect} from "react-router-dom";
 
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -53,7 +53,6 @@ const handleSubmit=(event)=>{
  setValues({...values,error:false,loading:true});
  signup({name,about,email,password})
  .then(data=>{
-   console.log(data);
    if(data.error){
      setValues({...values,error:data.error,loading:false})
    }else{
@@ -67,6 +66,11 @@ const handleSubmit=(event)=>{
  });
 };
 
+const redirectUser=()=>{
+  if(redirectToReferrer){
+  return <Redirect to="/"/>
+  }
+}
   return(
     <div>
       <Navbar/>
@@ -125,7 +129,7 @@ fullWidth/>
 <Button
 type="submit"
 variant="contained"
-color="primary"
+color="secondary"
 className={classes.button}
 disabled={loading}>Signup
 {loading && (
@@ -138,6 +142,7 @@ disabled={loading}>Signup
     </Grid>
     <Grid item sm/>
     </Grid>
+    {redirectUser()}
   </div>
   )
 }

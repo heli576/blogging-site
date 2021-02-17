@@ -15,7 +15,7 @@ export const signup=(user)=>{
   })
 };
 
-export const signin=(user)=>{
+export const login=(user)=>{
  return fetch(`/api/login`,{
    method:"POST",
    headers:{
@@ -65,4 +65,17 @@ export const isAuthenticated=()=>{
   }else{
     return false;
   }
+};
+
+export const getUserData= (userId) => {
+    return fetch(`/api/user/${userId}`, {
+        method: "GET",
+        headers: {
+            Accept: "application/json",
+        }
+    })
+        .then(response => {
+            return response.json();
+        })
+        .catch(err => console.log(err));
 };
