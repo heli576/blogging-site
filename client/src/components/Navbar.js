@@ -2,6 +2,7 @@ import React,{Fragment} from "react";
 import {Link} from "react-router-dom";
 import MyButton from "../util/MyButton";
 import {isAuthenticated} from "../util/userApi";
+import PostBlog from "./blog/PostBlog";
 
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";

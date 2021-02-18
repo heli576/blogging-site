@@ -15,6 +15,19 @@ exports.blogById=(req,res,next,id)=>{
   });
 };
 
+exports.getBlog=(req,res)=>{
+  Blog.findById(req.params.blogId)
+  .exec((err,blog)=>{
+    if(err||!blog){
+      return res.status(400).json({
+        error:"Blog does'nt exists."
+      });
+    }
+    res.json(blog);
+  });
+};
+
+
 
 exports.createBlog=(req,res)=>{
 //console.log(req.profile);
@@ -27,7 +40,7 @@ const blog=new Blog({
 blog.save((error,data)=>{
   if(error){
     return res.status(400).json({
-      error:errorHandler(error)
+      error:"Title and description are required"
     })
   }
   res.json(data);
@@ -40,16 +53,9 @@ exports.updateBlog=(req,res)=>{
   Blog
     .findOneAndUpdate({_id:req.params.blogId}, req.body)
     .exec(function(err, blog){
-      if(err) return res.status(500).json({err: err.message});
-      //res.json({blog, message: 'Successfully updated'})
+      if(err) {return res.status(500).json({err: err.message});}
+      res.status(200).json({message: 'Successfully updated'})
     });
-    Blog.findById(req.params.blogId)
-    .exec((err,blog)=>{
-      if(err){
-        console.log(err);
-      }
-      res.json(blog);
-    })
 };
 
 exports.deleteBlog=(req,res)=>{
@@ -65,8 +71,9 @@ exports.deleteBlog=(req,res)=>{
 };
 
 exports.getUserBlogs=(req,res)=>{
-  Blog.find({ user: req.params.userId })
-.sort('-created')
+  console.log("hello");
+  /*Blog.find({ user:req.params.userId })
+.sort('-createdAt')
 .exec((err,blogs)=>{
   if(err){
     return res.status(400).json({
@@ -74,12 +81,12 @@ exports.getUserBlogs=(req,res)=>{
     })
   }
   res.json(blogs);
-})
+})*/
 }
 
 exports.getAllBlogs=(req,res)=>{
   Blog.find()
-.sort('-created')
+.sort('-createdAt')
 .exec((err,blogs)=>{
   if(err){
     return res.status(400).json({
@@ -99,12 +106,7 @@ exports.likeBlog=(req,res)=>{
       error:errorHandler(err)
     });
   }
+  res.status(200).json("liked successfully");
 })
-Blog.findById(req.params.blogId)
-.exec((err,blog)=>{
-  if(err){
-    console.log(err);
-  }
-  res.json(blog);
-})
+
 }

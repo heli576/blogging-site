@@ -6,13 +6,14 @@ const blogSchema=new mongoose.Schema({
     type:String,
     trim:true,
     required:true,
-    maxlength:500,
+    maxlength:2000,
 
   },
   description:{
     type:String,
     required:true,
-    maxlength:50000,
+    maxlength:1000000000000,
+    trim:true
 },
 like:{
     type:Number,

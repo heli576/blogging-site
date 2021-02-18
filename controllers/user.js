@@ -1,4 +1,5 @@
 const User=require("../models/user");
+const Blog=require("../models/blog");
 const jwt=require("jsonwebtoken");
 const expressJwt=require("express-jwt");
 const {errorHandler}=require("../helpers/dbErrorHandler");
@@ -83,4 +84,18 @@ User.findById(req.params.userId)
 
 });
 
+}
+
+exports.getUserBlogs=(req,res)=>{
+
+  Blog.find({ user:req.params.userId })
+.sort('-createdAt')
+.exec((err,blogs)=>{
+  if(err){
+    return res.status(400).json({
+      error:errorHandler(error)
+    })
+  }
+  res.json(blogs);
+})
 }
