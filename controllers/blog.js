@@ -70,19 +70,7 @@ exports.deleteBlog=(req,res)=>{
   });
 };
 
-exports.getUserBlogs=(req,res)=>{
-  console.log("hello");
-  /*Blog.find({ user:req.params.userId })
-.sort('-createdAt')
-.exec((err,blogs)=>{
-  if(err){
-    return res.status(400).json({
-      error:errorHandler(error)
-    })
-  }
-  res.json(blogs);
-})*/
-}
+
 
 exports.getAllBlogs=(req,res)=>{
   Blog.find()

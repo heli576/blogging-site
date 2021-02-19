@@ -4,8 +4,6 @@ import Grid from "@material-ui/core/Grid";
 import {getUserBlogs,postBlog,deleteBlog,updateBlog,getBlog,likeBlog} from "../util/blogApi";
 import {getUserData,isAuthenticated} from "../util/userApi";
 import StaticProfile from "../components/profile/StaticProfile";
-
-
 import { makeStyles } from '@material-ui/core/styles';
 import MyButton from "../util/MyButton";
 import Button from '@material-ui/core/Button';
@@ -27,7 +25,7 @@ import DeleteOutline from "@material-ui/icons/DeleteOutline";
 import DialogActions from "@material-ui/core/DialogActions";
 import EditIcon from '@material-ui/icons/Edit';
 import ThumbUpAltIcon from '@material-ui/icons/ThumbUpAlt';
-//pb
+
 const useStyles = makeStyles((theme) => ({
 ...theme.spreadThis,
 submitButton:{
@@ -114,24 +112,12 @@ const User=(props)=>{
   const [blogs,setBlogs]=useState([]);
   const classes=useStyles();
 const [user,setUser]=useState({});
-
-
-
+const [updateblog,setUpdateBlog]=useState({});
 const [open,setOpen]=useState(false);
-const [values,setValues]=useState({
-  title:"",
-  description:""
-});
 const [error,setError]=useState("");
 const id=isAuthenticated()&&isAuthenticated().user._id;
 const token=isAuthenticated()&&isAuthenticated().token;
 
-const handleOpen=()=>{
-setOpen(true);
-};
-const handleClose=()=>{
-  setOpen(false)
-};
 
 const loadUserData=userId=>{
 getUserData(userId).then(data=>{
@@ -144,32 +130,6 @@ getUserData(userId).then(data=>{
 }
 
 
-const handleUpdateOpen=(blog)=>{
-  setValues({title:blog.title,description:blog.description})
-  setOpen(true);
-  };
-
-const {title,description}=values;
-
-const handleChange=(name)=>(event)=>{
-  const value=event.target.value;
- setValues({...values,[name]:value});
-};
-const handleSubmit=(event)=>{
-  event.preventDefault();
-  setValues({...values});
-postBlog(user._id,token,{title,description})
-.then((data)=>{
-  if(data.error)
-  setError(data.error);
-  else{
-    setValues({title:"",description:""})
-    setError("");
-    handleClose();
-    getBlogs();
-  }
-})
-};
 const getBlogs=(userId)=>{
 getUserBlogs(userId)
 .then(data=>{
@@ -192,13 +152,25 @@ else {
 
 };
 
+const handleUpdateOpen=(blog)=>{
+  setOpen(true);
+  setUpdateBlog(blog);
+}
+
+const handleUpdateChange=(name)=>(event)=>{
+  const value=event.target.value;
+ setUpdateBlog({...updateblog,[name]:value});
+};
+
 const handleEdit=(blogId)=>(event)=>{
 event.preventDefault();
-setValues({...values});
-updateBlog(blogId,user._id,token,values).then(data=>{
-setValues({title:"",description:""});
-handleClose();
-getBlogs(props.match.params.userId);
+setUpdateBlog({...updateblog});
+const body={title:updateblog.title,description:updateblog.description};
+
+updateBlog(blogId,id,token,body).then(data=>{
+setUpdateBlog({});
+setOpen(false);
+getBlogs(id);
 }
 )
 }
@@ -210,31 +182,39 @@ likeBlog(id,blogId,token)
 })
 }
 
-const postComponent=()=>{
 
-return(
+
+
+const blogComponent=(blog)=>{
+
+const deleteButton=isAuthenticated() && blog.user==id?(  <Fragment>
+  <MyButton tip="Delete Blog" onClick={()=>deleteblog(blog._id)}>
+<DeleteOutline color="primary"/>
+  </MyButton>
+</Fragment>):null;
+
+  const updateButton=isAuthenticated() && blog.user==id?(
     <Fragment>
-    <Button onClick={handleOpen} color="secondary" variant="contained"  style={{marginLeft:260,marginTop:-130}}>
-    Add a Blog
-    </Button>
-    <Dialog
-    open={open} onClose={handleClose} fullWidth maxWidth="sm">
-    <MyButton tip="Close" onClick={handleClose} tipClassName={classes.closeButton}>
+       <MyButton tip="Update Blog" onClick={()=>handleUpdateOpen(blog)} btnClassName={classes.deleteButton}>
+   <EditIcon color="secondary"/>
+       </MyButton>
+       <Dialog open={open} onClose={()=>setOpen(false)} fullWidth maxWidth="sm">
+ <MyButton tip="Close" onClick={()=>setOpen(false)} tipClassName={classes.closeButton}>
 <CloseIcon/>
-    </MyButton>
-    <DialogTitle>
-    Post a New Blog
-    </DialogTitle>
-    <DialogContent>
-    <form onSubmit={handleSubmit}>
+ </MyButton>
+ <DialogTitle>
+ Edit blog
+ </DialogTitle>
+ <DialogContent>
+    <form onSubmit={handleEdit(updateblog._id)}>
       <TextField
       name="title"
       type="text"
       label="Title"
       placeholder="Blog title"
       className={classes.textField}
-      value={title}
-      onChange={handleChange("title")}
+      value={updateblog.title}
+      onChange={handleUpdateChange("title")}
       fullWidth
       />
     <TextField
@@ -245,94 +225,34 @@ return(
     rows="4"
     placeholder="Blog description"
     className={classes.textField}
-    value={description}
-    onChange={handleChange("description")}
+    value={updateblog.description}
+    onChange={handleUpdateChange("description")}
     fullWidth
     />
     {error && (
       <Typography variant="body2" className={classes.customError}>
     {error}
-      </Typography>
+  </Typography>
     )}
 <Button type="submit" variant="contained" color="secondary" className={classes.submitButton}>
-Post
+Edit
 </Button>
 </form>
     </DialogContent>
-
-    </Dialog>
-    </Fragment>
-  )
-}
-
-const blogComponent=(blog)=>{
-
-const deleteButton=isAuthenticated() && blog.user==id?(  <Fragment>
-  <MyButton tip="Delete Blog" onClick={()=>deleteblog(blog._id)}>
-<DeleteOutline color="secondary"/>
-  </MyButton>
-</Fragment>):null;
-
-  const updateButton=isAuthenticated() && blog.user==id?(
-    <Fragment>
-     <MyButton tip="Update Blog" onClick={()=>handleUpdateOpen(blog)} btnClassName={classes.deleteButton}>
- <EditIcon color="secondary"/>
-     </MyButton>
-     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-     <MyButton tip="Close" onClick={handleClose} tipClassName={classes.closeButton}>
- <CloseIcon/>
-     </MyButton>
-     <DialogTitle>
-     Edit blog
-     </DialogTitle>
-     <DialogContent>
-     <form onSubmit={handleEdit(blog._id)}>
-       <TextField
-       name="title"
-       type="text"
-       label="Title"
-       placeholder="Blog title"
-       className={classes.textField}
-       value={title}
-       onChange={handleChange("title")}
-       fullWidth
-       />
-     <TextField
-     name="description"
-     type="text"
-     label="Description"
-     multiline
-     rows="4"
-     placeholder="Blog description"
-     className={classes.textField}
-     value={description}
-     onChange={handleChange("description")}
-     fullWidth
-     />
-     {error && (
-       <Typography variant="body2" className={classes.customError}>
-     {error}
-       </Typography>
-     )}
- <Button type="submit" variant="contained" color="secondary" className={classes.submitButton}>
- Edit
- </Button>
- </form>
-     </DialogContent>
- </Dialog>
-     </Fragment>
+</Dialog>
+</Fragment>
 
   ):null;
   const likeButton=!isAuthenticated()?(
 <Link to ="/login">
       <MyButton tip="Like">
-      <ThumbUpAltIcon color="primary"/>
+      <ThumbUpAltIcon color="secondary"/>
         </MyButton>
         </Link>
 
     ):(
         <MyButton tip="Like" onClick={()=>likeTheBlog(blog._id)}>
-        <ThumbUpAltIcon color="primary"/>
+        <ThumbUpAltIcon color="secondary"/>
         </MyButton>
       );
 return(
@@ -343,7 +263,7 @@ return(
 <Typography variant="body1">{blog.description}</Typography>
  {deleteButton}
  {updateButton}
-<span>{likeButton} {blog.like}</span>
+<span>{likeButton}{blog.like} Likes</span>
     </CardContent>
     </Card>
     )
@@ -361,7 +281,6 @@ getBlogs(userId);
     <Navbar/>
       <Grid container spacing={16} style={{marginTop:100}}>
       <Grid item lg={4} md={4} sm={12} xs={12}>
-          {id===props.match.params.userId?postComponent():null}
     <StaticProfile user={user}/>
     </Grid>
       <Grid item lg={8} md={8} sm={12} xs={12}>

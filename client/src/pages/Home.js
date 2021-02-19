@@ -25,7 +25,12 @@ import DeleteOutline from "@material-ui/icons/DeleteOutline";
 import DialogActions from "@material-ui/core/DialogActions";
 import EditIcon from '@material-ui/icons/Edit';
 import ThumbUpAltIcon from '@material-ui/icons/ThumbUpAlt';
-//pb
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import HomeIcon from "@material-ui/icons/Home";
+
+
+
 const useStyles = makeStyles((theme) => ({
 ...theme.spreadThis,
 submitButton:{
@@ -95,12 +100,25 @@ deleteButton:{
   [theme.breakpoints.down('xs')]: {
     position:"absolute",
     left:"85%",
-    top:"10%"
+    top:"7%"
   },
   [theme.breakpoints.up('md')]: {
     position:"absolute",
     left:"90%",
-    top:"10%"
+    top:"7%"
+  },
+
+},
+updateButton:{
+  [theme.breakpoints.down('xs')]: {
+    position:"absolute",
+    left:"78%",
+    top:"7%"
+  },
+  [theme.breakpoints.up('md')]: {
+    position:"absolute",
+    left:"85%",
+    top:"7%"
   },
 
 }
@@ -108,35 +126,39 @@ deleteButton:{
 
 
 const Home=()=>{
+  const classes=useStyles();
   dayjs.extend(relativeTime);
   const [blogs,setBlogs]=useState([]);
-  const classes=useStyles();
+  const [postDialog,setPostDialog]=useState(false);
   const [open,setOpen]=useState(false);
   const [values,setValues]=useState({
     title:"",
     description:""
   });
+
+  const [updateblog,setUpdateBlog]=useState({});
+
   const [error,setError]=useState("");
   const {user,token}=isAuthenticated();
 
 const handleOpen=()=>{
-  setOpen(true);
+    setPostDialog(true);
+  setValues({title:"",description:""})
+
   };
   const handleClose=()=>{
-    setOpen(false)
+    setPostDialog(false);
   };
 
-  const handleUpdateOpen=(blog)=>{
-    setValues({title:blog.title,description:blog.description})
-    setOpen(true);
-    };
 
 const {title,description}=values;
+
 
   const handleChange=(name)=>(event)=>{
     const value=event.target.value;
    setValues({...values,[name]:value});
   };
+
   const handleSubmit=(event)=>{
     event.preventDefault();
     setValues({...values});
@@ -152,6 +174,37 @@ const {title,description}=values;
     }
   })
   };
+
+  const handleUpdateOpen=(blog)=>{
+    setOpen(true);
+    setUpdateBlog(blog);
+  }
+
+  const handleUpdateChange=(name)=>(event)=>{
+    const value=event.target.value;
+   setUpdateBlog({...updateblog,[name]:value});
+  };
+
+const handleEdit=(blogId)=>(event)=>{
+event.preventDefault();
+setUpdateBlog({...updateblog});
+const body={title:updateblog.title,description:updateblog.description};
+
+updateBlog(blogId,user._id,token,body).then(data=>{
+  setUpdateBlog({});
+  setOpen(false);
+  getBlogs();
+}
+)
+}
+
+const likeTheBlog=(blogId)=>{
+  likeBlog(user._id,blogId,token)
+  .then(data=>{
+    getBlogs()
+  })
+}
+
 const getBlogs=()=>{
   getAllBlogs()
   .then(data=>{
@@ -174,33 +227,110 @@ deleteBlog(user._id,blogId,token).then(data=>{
 
 };
 
-const handleEdit=(blogId)=>(event)=>{
-  event.preventDefault();
-setValues({...values});
-updateBlog(blogId,user._id,token,values).then(data=>{
-  setValues({title:"",description:""});
-  handleClose();
-  getBlogs();
-}
-)
-}
 
-const likeTheBlog=(blogId)=>{
-  likeBlog(user._id,blogId,token)
-  .then(data=>{
-    getBlogs()
-  })
-}
 
-const postComponent=()=>{
+const blogComponent=(blog)=>{
+const deleteButton=isAuthenticated() && blog.user==user._id?(  <Fragment>
+    <MyButton tip="Delete Blog" onClick={()=>deleteblog(blog._id)} btnClassName={classes.deleteButton}>
+<DeleteOutline color="primary"/>
+    </MyButton>
+  </Fragment>):null;
 
-return(
+    const updateButton=isAuthenticated() && blog.user==user._id?(
       <Fragment>
-      <Button onClick={handleOpen} color="secondary" variant="contained"  style={{marginLeft:260,marginTop:-130}}>
-      Add a Blog
-      </Button>
-      <Dialog
-      open={open} onClose={handleClose} fullWidth maxWidth="sm">
+         <MyButton tip="Update Blog" onClick={()=>handleUpdateOpen(blog)} btnClassName={classes.updateButton}>
+     <EditIcon color="secondary"/>
+         </MyButton>
+         <Dialog open={open} onClose={()=>setOpen(false)} fullWidth maxWidth="sm">
+   <MyButton tip="Close" onClick={()=>setOpen(false)} tipClassName={classes.closeButton}>
+<CloseIcon/>
+   </MyButton>
+   <DialogTitle>
+   Edit blog
+   </DialogTitle>
+   <DialogContent>
+      <form onSubmit={handleEdit(updateblog._id)}>
+        <TextField
+        name="title"
+        type="text"
+        label="Title"
+        placeholder="Blog title"
+        className={classes.textField}
+        value={updateblog.title}
+        onChange={handleUpdateChange("title")}
+        fullWidth
+        />
+      <TextField
+      name="description"
+      type="text"
+      label="Description"
+      multiline
+      rows="4"
+      placeholder="Blog description"
+      className={classes.textField}
+      value={updateblog.description}
+      onChange={handleUpdateChange("description")}
+      fullWidth
+      />
+      {error && (
+        <Typography variant="body2" className={classes.customError}>
+      {error}
+    </Typography>
+      )}
+  <Button type="submit" variant="contained" color="secondary" className={classes.submitButton}>
+  Edit
+  </Button>
+  </form>
+      </DialogContent>
+</Dialog>
+</Fragment>
+):null;
+    const likeButton=!isAuthenticated()?(
+  <Link to ="/login">
+        <MyButton tip="Like">
+        <ThumbUpAltIcon color="secondary"/>
+          </MyButton>
+          </Link>
+
+      ):(
+          <MyButton tip="Like" onClick={()=>likeTheBlog(blog._id)}>
+          <ThumbUpAltIcon color="secondary"/>
+          </MyButton>
+        );
+  return(
+      <Card className={classes.card}>
+      <CardContent className={classes.content}>
+         <Typography variant="h6" color="secondary" component={Link} to={`/users/${blog.user}`}>{blog.title}</Typography>
+      <Typography variant="body2" color="textSecondary">{dayjs(blog.createdAt).fromNow()}</Typography>
+  <Typography variant="body1">{blog.description}</Typography>
+  {deleteButton}
+  {updateButton}
+<span>{likeButton}{blog.like} Likes</span>
+      </CardContent>
+      </Card>
+      )
+    }
+
+useEffect(()=>{
+  getBlogs();
+},[])
+
+  return(
+    <div>
+      <AppBar position="fixed" color="secondary">
+       <Toolbar className="nav-container">
+      {isAuthenticated()?(
+        <Fragment>
+       <Link to="/">
+       <MyButton tip="Home">
+       <HomeIcon/>
+       </MyButton>
+       </Link>
+       <Fragment>
+        <MyButton onClick={handleOpen} tip="Post a blog!">
+  <AddIcon/>
+        </MyButton>
+     <Dialog open={postDialog} onClose={handleClose} fullWidth maxWidth="sm">
       <MyButton tip="Close" onClick={handleClose} tipClassName={classes.closeButton}>
 <CloseIcon/>
       </MyButton>
@@ -242,107 +372,24 @@ Post
 </form>
       </DialogContent>
 
-      </Dialog>
+    </Dialog>
       </Fragment>
-    )
-  }
 
-const blogComponent=(blog)=>{
-
-  const deleteButton=isAuthenticated() && blog.user==user._id?(  <Fragment>
-    <MyButton tip="Delete Blog" onClick={()=>deleteblog(blog._id)}>
-<DeleteOutline color="secondary"/>
-    </MyButton>
-  </Fragment>):null;
-
-    const updateButton=isAuthenticated() && blog.user==user._id?(
-      <Fragment>
-       <MyButton tip="Update Blog" onClick={()=>handleUpdateOpen(blog)} btnClassName={classes.deleteButton}>
-   <EditIcon color="secondary"/>
-       </MyButton>
-       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-       <MyButton tip="Close" onClick={handleClose} tipClassName={classes.closeButton}>
-   <CloseIcon/>
-       </MyButton>
-       <DialogTitle>
-       Edit blog
-       </DialogTitle>
-       <DialogContent>
-       <form onSubmit={handleEdit(blog._id)}>
-         <TextField
-         name="title"
-         type="text"
-         label="Title"
-         placeholder="Blog title"
-         className={classes.textField}
-         value={title}
-         onChange={handleChange("title")}
-         fullWidth
-         />
-       <TextField
-       name="description"
-       type="text"
-       label="Description"
-       multiline
-       rows="4"
-       placeholder="Blog description"
-       className={classes.textField}
-       value={description}
-       onChange={handleChange("description")}
-       fullWidth
-       />
-       {error && (
-         <Typography variant="body2" className={classes.customError}>
-       {error}
-         </Typography>
-       )}
-   <Button type="submit" variant="contained" color="secondary" className={classes.submitButton}>
-   Edit
-   </Button>
-   </form>
-       </DialogContent>
-   </Dialog>
        </Fragment>
 
-    ):null;
-    const likeButton=!isAuthenticated()?(
-  <Link to ="/login">
-        <MyButton tip="Like">
-        <ThumbUpAltIcon color="primary"/>
-          </MyButton>
-          </Link>
-
       ):(
-          <MyButton tip="Like" onClick={()=>likeTheBlog(blog._id)}>
-          <ThumbUpAltIcon color="primary"/>
-          </MyButton>
-        );
-  return(
-      <Card className={classes.card}>
-      <CardContent className={classes.content}>
-         <Typography variant="h6" color="secondary" component={Link} to={`/users/${blog.user}`}>{blog.title}</Typography>
-      <Typography variant="body2" color="textSecondary">{dayjs(blog.createdAt).fromNow()}</Typography>
-  <Typography variant="body1">{blog.description}</Typography>
-   {deleteButton}
-   {updateButton}
-  <span>{likeButton} {blog.like}</span> 
-      </CardContent>
-      </Card>
-      )
-    }
-
-useEffect(()=>{
-  getBlogs();
-},[])
-
-  return(
-    <div>
-      <Navbar/>
+        <Fragment>
+       <Button color="inherit" component={Link} to="/login">Login</Button>
+       <Button color="inherit" component={Link} to="/">Home</Button>
+       <Button color="inherit" component={Link} to="/signup">Signup</Button>
+       </Fragment>
+      )}
+      </Toolbar>
+        </AppBar>
         <Grid container spacing={16} style={{marginTop:100}}>
         <Grid item lg={4} md={4} sm={12} xs={12}>
       <Profile/>
-    {isAuthenticated()?postComponent():null}
-      </Grid>
+     </Grid>
         <Grid item lg={8} md={8} sm={12} xs={12}>
         {blogs.map((b)=>blogComponent(b))}
         </Grid>

@@ -82,8 +82,8 @@ let profileMarkup=isAuthenticated()?(
       No profile found,please login again
       </Typography>
       <div className={classes.buttons}>
-      <Button variant="contained" color="primary" component={Link} to="/login">Login</Button>
-<Button variant="contained" color="secondary" component={Link} to="/signup">Signup</Button>
+      <Button variant="contained" color="secondary" component={Link} to="/login">Login</Button>
+<Button variant="contained" color="primary" component={Link} to="/signup">Signup</Button>
       </div>
       </Paper>
     )
